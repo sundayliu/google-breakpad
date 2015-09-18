@@ -342,7 +342,14 @@ typedef enum {
   MD_LINUX_ENVIRON               = 0x47670007,  /* /proc/$x/environ   */
   MD_LINUX_AUXV                  = 0x47670008,  /* /proc/$x/auxv      */
   MD_LINUX_MAPS                  = 0x47670009,  /* /proc/$x/maps      */
-  MD_LINUX_DSO_DEBUG             = 0x4767000A   /* MDRawDebug{32,64}  */
+  MD_LINUX_DSO_DEBUG             = 0x4767000A,  /* MDRawDebug{32,64}  */
+
+  /*Bugtrace extension types. 0x5467 = "Tg" */
+  MD_BUGTRACE_INFO_STREAM		 = 0x54670001,  /* MDBugtraceInfo */
+  MD_JAVA_CRASH_CAUSE			 = 0x54670002,  /* Java Crash cause */
+  MD_JAVA_CRASH_STACK			 = 0x54670003,  /* Java Crash stack */
+  MD_SYMBOL_LIST_STREAM			 = 0x54670004,  /* Local symbol */
+  
 } MDStreamType;  /* MINIDUMP_STREAM_TYPE */
 
 

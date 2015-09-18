@@ -4521,6 +4521,14 @@ static const char* get_stream_name(uint32_t stream_type) {
     return "MD_LINUX_MAPS";
   case MD_LINUX_DSO_DEBUG:
     return "MD_LINUX_DSO_DEBUG";
+  case MD_BUGTRACE_INFO_STREAM:
+	return "MD_BUGTRACE_INFO_STREAM";
+  case MD_JAVA_CRASH_CAUSE:
+  	return "MD_JAVA_CRASH_CAUSE";
+  case MD_JAVA_CRASH_STACK:
+  	return "MD_JAVA_CRASH_STACK";
+  case MD_SYMBOL_LIST_STREAM:
+  	return "MD_SYSMBOL_LIST_STREAM";
   default:
     return "unknown";
   }

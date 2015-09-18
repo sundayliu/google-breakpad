@@ -196,6 +196,16 @@ static bool PrintMinidumpDump(const char *minidump_file) {
                 "MD_LINUX_MAPS",
                 &errors);
 
+  DumpRawStream(&minidump,
+  				MD_JAVA_CRASH_CAUSE,
+  				"MD_JAVA_CRASH_CAUSE",
+  				&errors);
+
+  DumpRawStream(&minidump,
+  				MD_JAVA_CRASH_STACK,
+  				"MD_JAVA_CARSH_STACK",
+  				&errors);
+
   return errors == 0;
 }
 
