@@ -35,10 +35,15 @@
 #define CLIENT_MINIDUMP_FILE_WRITER_H__
 
 #include <string>
-
+#include <stdio.h>
 #include "google_breakpad/common/minidump_format.h"
 
+#define __ENABLE_DEBUG_LOG__
+#ifdef __ENABLE_DEBUG_LOG__
 #define DEBUG_LOG(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_LOG(...) ((void)0)
+#endif
 
 namespace google_breakpad {
 
