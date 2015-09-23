@@ -38,6 +38,8 @@
 
 #include "google_breakpad/common/minidump_format.h"
 
+#define DEBUG_LOG(...) printf(__VA_ARGS__)
+
 namespace google_breakpad {
 
 class UntypedMDRVA;

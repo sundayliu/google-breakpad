@@ -244,6 +244,8 @@ MDRVA MinidumpFileWriter::Allocate(size_t size) {
 }
 
 bool MinidumpFileWriter::Copy(MDRVA position, const void *src, ssize_t size) {
+
+	DEBUG_LOG("[copy]position:%d,src:%p,size:%d\n", position, src, size);
   assert(src);
   assert(size);
   assert(file_ != -1);

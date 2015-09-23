@@ -268,6 +268,7 @@ typedef struct {
      /* MINIDUMP_SIGNATURE */
 #define MD_HEADER_VERSION   0x0000a793 /* 42899 */
      /* MINIDUMP_VERSION */
+#define MD_HEADER_VERSION_JAVA	0x10000000 /* Java specific version */
 
 /* For (MDRawHeader).flags: */
 typedef enum {
