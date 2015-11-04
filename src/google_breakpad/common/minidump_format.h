@@ -269,6 +269,8 @@ typedef struct {
 #define MD_HEADER_VERSION   0x0000a793 /* 42899 */
      /* MINIDUMP_VERSION */
 #define MD_HEADER_VERSION_JAVA	0x10000000 /* Java specific version */
+#define MD_HEADER_VERSION_CSHARP  0x20000000 /* C# specific version */
+
 
 /* For (MDRawHeader).flags: */
 typedef enum {
@@ -350,6 +352,8 @@ typedef enum {
   MD_JAVA_CRASH_CAUSE			 = 0x54670002,  /* Java Crash cause */
   MD_JAVA_CRASH_STACK			 = 0x54670003,  /* Java Crash stack */
   MD_SYMBOL_LIST_STREAM			 = 0x54670004,  /* Local symbol */
+  MD_CSHARP_CRASH_CAUSE          = 0x54670005,  /* C# Crash cause */
+  MD_CSHARP_CRASH_STACK          = 0x54670006   /* C# Crash cause */
   
 } MDStreamType;  /* MINIDUMP_STREAM_TYPE */
 

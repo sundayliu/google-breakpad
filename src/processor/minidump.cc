@@ -4529,6 +4529,10 @@ static const char* get_stream_name(uint32_t stream_type) {
   	return "MD_JAVA_CRASH_STACK";
   case MD_SYMBOL_LIST_STREAM:
   	return "MD_SYSMBOL_LIST_STREAM";
+  case MD_CSHARP_CRASH_CAUSE:
+	return "MD_CSHARP_CRASH_CAUSE";
+  case MD_CSHARP_CRASH_STACK:
+  	return "MD_CSHARP_CRASH_STACK";
   default:
     return "unknown";
   }
@@ -4541,6 +4545,13 @@ void Minidump::Print() {
   }
 
   printf("MDRawHeader\n");
+  if ((header_.version & 0xffff0000) == MD_HEADER_VERSION_JAVA){
+  	printf("  ===Java crash\n");
+  }
+  else if ((header_.version & 0xffff0000) == MD_HEADER_VERSION_CSHARP){
+  	printf("  ===C# crash\n");
+  }
+  //printf("  version              = 0x%x\n",    header_.version & 0xffff0000);
   printf("  signature            = 0x%x\n",    header_.signature);
   printf("  version              = 0x%x\n",    header_.version);
   printf("  stream_count         = %d\n",      header_.stream_count);
