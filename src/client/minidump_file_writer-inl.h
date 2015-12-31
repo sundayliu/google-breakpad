@@ -39,6 +39,7 @@
 #include "client/minidump_file_writer.h"
 #include "google_breakpad/common/minidump_size.h"
 
+//#define DEBUG_LOG(...)
 namespace google_breakpad {
 
 template<typename MDType>

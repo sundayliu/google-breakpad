@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include "google_breakpad/common/minidump_format.h"
 
-#define __ENABLE_DEBUG_LOG__
+//#define __ENABLE_DEBUG_LOG__
 #ifdef __ENABLE_DEBUG_LOG__
 #define DEBUG_LOG(...) printf(__VA_ARGS__)
 #else

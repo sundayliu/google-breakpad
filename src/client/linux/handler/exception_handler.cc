@@ -414,6 +414,7 @@ int ExceptionHandler::ThreadEntry(void *arg) {
 // This function runs in a compromised context: see the top of the file.
 // Runs on the crashing thread.
 bool ExceptionHandler::HandleSignal(int sig, siginfo_t* info, void* uc) {
+  printf("HandleSignal %d:%d\n", getpid(), gettid());
   if (filter_ && !filter_(callback_context_))
     return false;
 
@@ -471,6 +472,7 @@ bool ExceptionHandler::SimulateSignalDelivery(int sig) {
 
 // This function may run in a compromised context: see the top of the file.
 bool ExceptionHandler::GenerateDump(CrashContext *context) {
+  logger::write("GenerateDump", strlen("GenerateDump"));
   if (IsOutOfProcess())
     return crash_generation_client_->RequestDump(context, sizeof(*context));
 
@@ -510,6 +512,7 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
     fdes[0] = fdes[1] = -1;
   }
 
+	/*
   const pid_t child = sys_clone(
       ThreadEntry, stack, CLONE_FILES | CLONE_FS | CLONE_UNTRACED,
       &thread_arg, NULL, NULL, NULL);
@@ -518,6 +521,17 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
     sys_close(fdes[1]);
     return false;
   }
+  */
+
+  pid_t child = fork();
+  if (child == 0){
+	// child 
+	ThreadEntry(&thread_arg);
+	exit(0);
+  }
+  else{
+  	// parent
+  	}
 
   // Allow the child to ptrace us
   sys_prctl(PR_SET_PTRACER, child, 0, 0, 0);
