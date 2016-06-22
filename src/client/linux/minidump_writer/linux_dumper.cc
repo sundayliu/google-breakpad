@@ -51,6 +51,8 @@
 #include "common/linux/memory_mapped_file.h"
 #include "common/linux/safe_readlink.h"
 #include "third_party/lss/linux_syscall_support.h"
+#include "client/linux/log/log.h"
+
 
 #if defined(__ANDROID__)
 
@@ -105,7 +107,21 @@ LinuxDumper::~LinuxDumper() {
 }
 
 bool LinuxDumper::Init() {
-  return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
+	bool result = false;
+	bool result1 = false;
+	bool result2 = false;
+	bool result3 = false;
+	result1 = ReadAuxv();
+	printf("ReadAuxv():%d\n", result1);
+
+	result2 = EnumerateMappings();
+	printf("EnumerateMappings() :%d\n", result2);
+	
+	result3 = EnumerateThreads();
+	printf("EnumerateThreads():%d\n", result3);
+
+	return result1 && result2 && result3;
+  //return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
 }
 
 bool LinuxDumper::LateInit() {
@@ -278,15 +294,19 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
 }
 
 bool LinuxDumper::ReadAuxv() {
-  char auxv_path[NAME_MAX];
-  if (!BuildProcPath(auxv_path, pid_, "auxv")) {
-    return false;
-  }
+  char auxv_path[NAME_MAX] = "/proc/self/auxv";
+  //if (!BuildProcPath(auxv_path, pid_, "auxv")) {
+  //	logger::write("LinuxDumper::ReadAuxv BuildProcPath fail", strlen("LinuxDumper::ReadAuxv BuildProcPath fail"));
+  //  return false;
+  //}
 
   int fd = sys_open(auxv_path, O_RDONLY, 0);
   if (fd < 0) {
+  	logger::write("LinuxDumper::ReadAuxv sys_open fail", strlen("LinuxDumper::ReadAuxv sys_open fail"));
     return false;
   }
+
+  printf("ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
 
   elf_aux_entry one_aux_entry;
   bool res = false;
@@ -294,19 +314,38 @@ bool LinuxDumper::ReadAuxv() {
                   &one_aux_entry,
                   sizeof(elf_aux_entry)) == sizeof(elf_aux_entry) &&
          one_aux_entry.a_type != AT_NULL) {
+         printf("type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
     if (one_aux_entry.a_type <= AT_MAX) {
       auxv_[one_aux_entry.a_type] = one_aux_entry.a_un.a_val;
       res = true;
+	  logger::write("LinuxDumper::ReadAuxv SUCCESS", strlen("LinuxDumper::ReadAuxv SUCCESS"));
     }
   }
   sys_close(fd);
+  logger::write("LinuxDumper::ReadAuxv END", strlen("LinuxDumper::ReadAuxv END"));
   return res;
 }
 
 bool LinuxDumper::EnumerateMappings() {
-  char maps_path[NAME_MAX];
-  if (!BuildProcPath(maps_path, pid_, "maps"))
-    return false;
+  char maps_path[NAME_MAX] = "/proc/self/maps";
+  //if (!BuildProcPath(maps_path, pid_, "maps"))
+  //  return false;
+
+  FILE* fp = fopen(maps_path, "r");
+  if (fp != NULL){
+  	fseek(fp, 0, SEEK_END);
+	int size = ftell(fp);
+	printf("size:%d\n", size);
+	char temp[1024] = {0};
+	fgets(temp, sizeof(temp), fp);
+	printf("line:%s\n", temp);
+		
+	
+	fclose(fp);
+  }
+  else{
+	printf("error:%d:%s\n", errno, strerror(errno));
+  }
 
   // linux_gate_loc is the beginning of the kernel's mapping of
   // linux-gate.so in the process.  It doesn't actually show up in the
@@ -317,16 +356,20 @@ bool LinuxDumper::EnumerateMappings() {
   // information.
   const void* linux_gate_loc =
       reinterpret_cast<void *>(auxv_[AT_SYSINFO_EHDR]);
+  printf("vDSO address:%p\n", linux_gate_loc);
   // Although the initial executable is usually the first mapping, it's not
   // guaranteed (see http://crosbug.com/25355); therefore, try to use the
   // actual entry point to find the mapping.
   const void* entry_point_loc = reinterpret_cast<void *>(auxv_[AT_ENTRY]);
+  printf("entry point loc:%p\n", entry_point_loc);
 
   const int fd = sys_open(maps_path, O_RDONLY, 0);
+  printf("map path:%s\n", maps_path);
   if (fd < 0)
     return false;
   LineReader* const line_reader = new(allocator_) LineReader(fd);
 
+  printf("open %s success fd:%d\n", maps_path, fd);
   const char* line;
   unsigned line_len;
   while (line_reader->GetNextLine(&line, &line_len)) {
@@ -348,9 +391,15 @@ bool LinuxDumper::EnumerateMappings() {
             name = kLinuxGateLibraryName;
             offset = 0;
           }
+
+		  if (name != NULL){
+			printf("mapings name:%s\n", name);
+		  }
           // Merge adjacent mappings with the same name into one module,
           // assuming they're a single library mapped by the dynamic linker
           if (name && !mappings_.empty()) {
+		  	printf("mapings 1\n");
+			// same name back
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
                 (my_strlen(name) == my_strlen(module->name)) &&
@@ -365,6 +414,7 @@ bool LinuxDumper::EnumerateMappings() {
           // appear as an anonymous private mapping with no access flags set
           // and which directly follow an executable mapping.
           if (!name && !mappings_.empty()) {
+		  	printf("mapping 2\n");
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
                 module->exec &&

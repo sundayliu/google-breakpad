@@ -30,9 +30,15 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := test_google_breakpad
+LOCAL_MODULE := breakpad
 LOCAL_SRC_FILES := test_breakpad.cpp
 LOCAL_STATIC_LIBRARIES += breakpad_client
+include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := test
+LOCAL_SRC_FILES := test_elf.cpp
+#LOCAL_STATIC_LIBRARIES += breakpad_client
 include $(BUILD_EXECUTABLE)
 
 # If NDK_MODULE_PATH is defined, import the module, otherwise do a direct

@@ -77,6 +77,8 @@
 #include "common/minidump_type_helper.h"
 #include "google_breakpad/common/minidump_format.h"
 #include "third_party/lss/linux_syscall_support.h"
+#include "client/linux/log/log.h"
+
 
 namespace {
 
@@ -144,14 +146,19 @@ class MinidumpWriter {
   }
 
   bool Init() {
-    if (!dumper_->Init())
+    if (!dumper_->Init()){
+	  logger::write("dumper_->init fail", strlen("dumper_->init fail"));
       return false;
+    }
 
-    if (fd_ != -1)
+    if (fd_ != -1){
       minidump_writer_.SetFile(fd_);
-    else if (!minidump_writer_.Open(path_))
+    }
+    else if (!minidump_writer_.Open(path_)){
+		logger::write("open fail", strlen("open fail"));
       return false;
-
+    }
+    logger::write("ThreadSuspend", strlen("ThreadSuspend"));
     return dumper_->ThreadsSuspend() && dumper_->LateInit();
   }
 
@@ -167,6 +174,8 @@ class MinidumpWriter {
     // A minidump file contains a number of tagged streams. This is the number
     // of stream which we write.
     unsigned kNumWriters = 13;
+
+	printf("start dump...\n");
 
     TypedMDRVA<MDRawHeader> header(&minidump_writer_);
     TypedMDRVA<MDRawDirectory> dir(&minidump_writer_);
@@ -1280,8 +1289,12 @@ bool WriteMinidumpImpl(const char* minidump_path,
                         appmem, &dumper);
   // Set desired limit for file size of minidump (-1 means no limit).
   writer.set_minidump_size_limit(minidump_size_limit);
-  if (!writer.Init())
+  if (!writer.Init()){
+  	logger::write("writer init fail", strlen("writer init fail"));
     return false;
+	
+  }
+  logger::write("writer init success", strlen("writer init success"));
   return writer.Dump();
 }
 

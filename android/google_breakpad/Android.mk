@@ -78,8 +78,13 @@ LOCAL_SRC_FILES := \
     src/client/linux/minidump_writer/linux_ptrace_dumper.cc \
     src/client/linux/minidump_writer/minidump_writer.cc \
     src/client/linux/microdump_writer/microdump_writer.cc \
+<<<<<<< HEAD
     src/client/linux/dump_writer_common/thread_info.cc \
     src/client/linux/dump_writer_common/ucontext_reader.cc \
+=======
+    src/client/linux/dump_writer_common/ucontext_reader.cc \
+    src/client/linux/dump_writer_common/thread_info.cc \
+>>>>>>> 4023bbe3d5c368ef27cb9531516cd756e38b56c4
     src/client/minidump_file_writer.cc \
     src/common/android/breakpad_getcontext.S \
     src/common/convert_UTF.c \
