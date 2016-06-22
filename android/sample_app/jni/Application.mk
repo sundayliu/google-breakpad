@@ -28,9 +28,5 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 APP_STL := stlport_static
-<<<<<<< HEAD
 APP_ABI := armeabi armeabi-v7a arm64-v8a x86 x86_64
-=======
-APP_ABI := armeabi #armeabi-v7a arm64-v8a x86 x86_64 mips
-APP_CPPFLAGS += -std=gnu++11 -D__STDC_LIMIT_MACROS
->>>>>>> 4023bbe3d5c368ef27cb9531516cd756e38b56c4
+APP_CPPFLAGS += -std=c++11 -D__STDC_LIMIT_MACROS
