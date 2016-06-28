@@ -28,7 +28,7 @@
 
 # Ignore other VCSs.
 .svn/
-
+.DS_Store
 # Ignore common compiled artifacts.
 *~
 *.o

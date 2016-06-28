@@ -1,2 +1,0 @@
-# google-breakpad
-google-breakpad
