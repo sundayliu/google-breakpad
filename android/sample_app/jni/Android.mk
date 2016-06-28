@@ -33,6 +33,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := test_google_breakpad
 LOCAL_SRC_FILES := test_breakpad.cpp
 LOCAL_STATIC_LIBRARIES += breakpad_client
+LOCAL_LDLIBS:=-llog
 include $(BUILD_EXECUTABLE)
 
 # If NDK_MODULE_PATH is defined, import the module, otherwise do a direct
