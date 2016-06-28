@@ -270,9 +270,11 @@ bool MinidumpFileWriter::Copy(MDRVA position, const void *src, ssize_t size) {
 }
 
 bool UntypedMDRVA::Allocate(size_t size) {
+	printf("UntypedMDRVA::Allocate:%d\n", size);
   assert(size_ == 0);
   size_ = size;
   position_ = writer_->Allocate(size_);
+  printf("%u:%u\n", position_, MinidumpFileWriter::kInvalidMDRVA);
   return position_ != MinidumpFileWriter::kInvalidMDRVA;
 }
 

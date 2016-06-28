@@ -96,6 +96,7 @@
 #include "client/linux/minidump_writer/minidump_writer.h"
 #include "common/linux/eintr_wrapper.h"
 #include "third_party/lss/linux_syscall_support.h"
+#include <android/log.h>
 
 #if defined(__ANDROID__)
 #include "linux/sched.h"
@@ -401,6 +402,8 @@ struct ThreadArgument {
 // context here: see the top of the file.
 // static
 int ExceptionHandler::ThreadEntry(void *arg) {
+	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "pid:%d,uid:%d,gid:%d", getpid(), getuid(), getgid());
+
   const ThreadArgument *thread_arg = reinterpret_cast<ThreadArgument*>(arg);
 
   // Block here until the crashing process unblocks us when
@@ -512,7 +515,8 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
     fdes[0] = fdes[1] = -1;
   }
 
-	/*
+
+	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "pid:%d,uid:%d,gid:%d", getpid(), getuid(), getgid());
   const pid_t child = sys_clone(
       ThreadEntry, stack, CLONE_FILES | CLONE_FS | CLONE_UNTRACED,
       &thread_arg, NULL, NULL, NULL);
@@ -521,8 +525,9 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
     sys_close(fdes[1]);
     return false;
   }
-  */
-
+  
+  
+/*
   pid_t child = fork();
   if (child == 0){
 	// child 
@@ -532,6 +537,9 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
   else{
   	// parent
   	}
+
+  	*/
+  	
 
   // Allow the child to ptrace us
   sys_prctl(PR_SET_PTRACER, child, 0, 0, 0);

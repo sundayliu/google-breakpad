@@ -53,6 +53,8 @@
 #include "third_party/lss/linux_syscall_support.h"
 #include "client/linux/log/log.h"
 
+#include <android/log.h>
+
 
 #if defined(__ANDROID__)
 
@@ -112,13 +114,13 @@ bool LinuxDumper::Init() {
 	bool result2 = false;
 	bool result3 = false;
 	result1 = ReadAuxv();
-	printf("ReadAuxv():%d\n", result1);
+	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv():%d\n", result1);
 
 	result2 = EnumerateMappings();
-	printf("EnumerateMappings() :%d\n", result2);
+	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateMappings() :%d\n", result2);
 	
 	result3 = EnumerateThreads();
-	printf("EnumerateThreads():%d\n", result3);
+	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateThreads():%d\n", result3);
 
 	return result1 && result2 && result3;
   //return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
@@ -294,11 +296,11 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
 }
 
 bool LinuxDumper::ReadAuxv() {
-  char auxv_path[NAME_MAX] = "/proc/self/auxv";
-  //if (!BuildProcPath(auxv_path, pid_, "auxv")) {
-  //	logger::write("LinuxDumper::ReadAuxv BuildProcPath fail", strlen("LinuxDumper::ReadAuxv BuildProcPath fail"));
-  //  return false;
-  //}
+  char auxv_path[NAME_MAX]; // = "/proc/self/auxv";
+  if (!BuildProcPath(auxv_path, pid_, "auxv")) {
+  	logger::write("LinuxDumper::ReadAuxv BuildProcPath fail", strlen("LinuxDumper::ReadAuxv BuildProcPath fail"));
+    return false;
+  }
 
   int fd = sys_open(auxv_path, O_RDONLY, 0);
   if (fd < 0) {
@@ -306,7 +308,7 @@ bool LinuxDumper::ReadAuxv() {
     return false;
   }
 
-  printf("ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
+  __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
 
   elf_aux_entry one_aux_entry;
   bool res = false;
@@ -314,7 +316,7 @@ bool LinuxDumper::ReadAuxv() {
                   &one_aux_entry,
                   sizeof(elf_aux_entry)) == sizeof(elf_aux_entry) &&
          one_aux_entry.a_type != AT_NULL) {
-         printf("type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
+         __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
     if (one_aux_entry.a_type <= AT_MAX) {
       auxv_[one_aux_entry.a_type] = one_aux_entry.a_un.a_val;
       res = true;
@@ -327,9 +329,9 @@ bool LinuxDumper::ReadAuxv() {
 }
 
 bool LinuxDumper::EnumerateMappings() {
-  char maps_path[NAME_MAX] = "/proc/self/maps";
-  //if (!BuildProcPath(maps_path, pid_, "maps"))
-  //  return false;
+  char maps_path[NAME_MAX];// = "/proc/self/maps";
+  if (!BuildProcPath(maps_path, pid_, "maps"))
+    return false;
 
   FILE* fp = fopen(maps_path, "r");
   if (fp != NULL){

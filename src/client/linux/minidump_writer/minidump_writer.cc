@@ -179,9 +179,13 @@ class MinidumpWriter {
 
     TypedMDRVA<MDRawHeader> header(&minidump_writer_);
     TypedMDRVA<MDRawDirectory> dir(&minidump_writer_);
-    if (!header.Allocate())
+
+	printf("header Allocate...\n");
+	if (!header.Allocate())
       return false;
-    if (!dir.AllocateArray(kNumWriters))
+
+	printf("dir AllocateArray...\n");
+	if (!dir.AllocateArray(kNumWriters))
       return false;
     my_memset(header.get(), 0, sizeof(MDRawHeader));
 
@@ -194,14 +198,17 @@ class MinidumpWriter {
     unsigned dir_index = 0;
     MDRawDirectory dirent;
 
+	printf("WriteThreadListStream...\n");
     if (!WriteThreadListStream(&dirent))
       return false;
     dir.CopyIndex(dir_index++, &dirent);
 
+	printf("WriteMappings ...\n");
     if (!WriteMappings(&dirent))
       return false;
     dir.CopyIndex(dir_index++, &dirent);
 
+	printf("WriteAppMemory ...\n");
     if (!WriteAppMemory())
       return false;
 
@@ -1291,7 +1298,7 @@ bool WriteMinidumpImpl(const char* minidump_path,
   writer.set_minidump_size_limit(minidump_size_limit);
   if (!writer.Init()){
   	logger::write("writer init fail", strlen("writer init fail"));
-    return false;
+    //return false;
 	
   }
   logger::write("writer init success", strlen("writer init success"));
