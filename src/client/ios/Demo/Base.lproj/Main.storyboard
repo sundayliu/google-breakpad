@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
+                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Crash test for iOS" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bvA-Qy-APK">
+                                <rect key="frame" x="20" y="28" width="280" height="21"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="m8V-0d-agZ">
+                                <rect key="frame" x="20" y="95" width="280" height="30"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="YFP-i7-fTc"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Crash for C/C++"/>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Warning information" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="4" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eaj-b0-3be">
+                                <rect key="frame" x="20" y="146" width="280" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Fer-3X-FmW">
+                                <rect key="frame" x="20" y="182" width="280" height="128"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="128" id="9sU-xt-ncY"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="06g-el-cxP">
+                                <rect key="frame" x="20" y="57" width="280" height="30"/>
+                                <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="VCY-xQ-eAo"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Crash for Ojective-C/C++"/>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="eaj-b0-3be" firstAttribute="top" secondItem="m8V-0d-agZ" secondAttribute="bottom" constant="21" id="1tD-Ky-qQm"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="top" secondItem="bvA-Qy-APK" secondAttribute="bottom" constant="8" id="3BZ-u3-J4d"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="3NH-e3-QAs"/>
+                            <constraint firstItem="bvA-Qy-APK" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="4Tk-H7-aua"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="7ay-ry-kD6"/>
+                            <constraint firstItem="m8V-0d-agZ" firstAttribute="top" secondItem="06g-el-cxP" secondAttribute="bottom" constant="8" id="Biu-Tt-dcR"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="top" secondItem="bvA-Qy-APK" secondAttribute="bottom" constant="8" id="DV3-Se-r9g"/>
+                            <constraint firstItem="Fer-3X-FmW" firstAttribute="top" secondItem="eaj-b0-3be" secondAttribute="bottom" constant="15" id="Lfa-Rv-jJf"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="ZmD-ao-2eS"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="top" secondItem="bvA-Qy-APK" secondAttribute="bottom" constant="8" id="bJl-Fr-mfh"/>
+                            <constraint firstItem="eaj-b0-3be" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="hiq-6R-aW9"/>
+                            <constraint firstItem="eaj-b0-3be" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="mnY-g6-0gB"/>
+                            <constraint firstItem="bvA-Qy-APK" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="s5r-Iq-8M5"/>
+                            <constraint firstItem="Fer-3X-FmW" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="tsX-Hx-Ix9"/>
+                            <constraint firstItem="06g-el-cxP" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="u9y-cw-4Pq"/>
+                            <constraint firstItem="m8V-0d-agZ" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="uSA-bG-q88"/>
+                            <constraint firstItem="m8V-0d-agZ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="x4j-gw-gXw"/>
+                            <constraint firstItem="bvA-Qy-APK" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="xnb-vB-31D"/>
+                            <constraint firstItem="Fer-3X-FmW" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="yEO-17-YyU"/>
+                            <constraint firstItem="m8V-0d-agZ" firstAttribute="top" secondItem="06g-el-cxP" secondAttribute="bottom" constant="8" id="zz4-Cn-UI2"/>
+                        </constraints>
+                    </view>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <outlet property="btnCrashObj" destination="06g-el-cxP" id="T0Q-13-UTs"/>
+                        <outlet property="btnCrashUnix" destination="m8V-0d-agZ" id="Ybe-xF-R1t"/>
+                        <outlet property="imageWarning" destination="Fer-3X-FmW" id="8fm-TL-9in"/>
+                        <outlet property="labelWarning" destination="eaj-b0-3be" id="mdy-WU-MYP"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="565" y="300"/>
+        </scene>
+    </scenes>
+</document>

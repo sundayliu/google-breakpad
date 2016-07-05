@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace google_breakpad
-{
+NS_GOOGLE_BREAKPAD_BEGIN
+
 	PFN_DUMP_CALLBACK g_minidump_callback = NULL;
 	static bool DumpCallback(const MinidumpDescriptor& descriptor, void* context, bool succeeded)
 	{
@@ -31,4 +31,4 @@ namespace google_breakpad
 		descriptor.set_size_limit(size_limit);
 		static ExceptionHandler eh(descriptor, cbFilter, DumpCallback, NULL, true, -1);
 	}
-}
+NS_GOOGLE_BREAKPAD_END

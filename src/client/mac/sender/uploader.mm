@@ -40,6 +40,8 @@
 #import "client/mac/sender/uploader.h"
 #import "common/mac/GTMLogger.h"
 
+#import <string>
+
 const int kMinidumpFileLengthLimit = 2 * 1024 * 1024;  // 2MB
 
 #define kApplePrefsSyncExcludeAllKey \
@@ -89,24 +91,25 @@ NSData *readData(int fileId, ssize_t length) {
 NSDictionary *readConfigurationData(const char *configFile) {
   int fileId = open(configFile, O_RDONLY, 0600);
   if (fileId == -1) {
-    GTMLoggerDebug(@"Couldn't open config file %s - %s",
+    NSLog(@"Couldn't open config file %s - %s",
                    configFile,
                    strerror(errno));
   }
 
   // we want to avoid a build-up of old config files even if they
   // have been incorrectly written by the framework
-  if (unlink(configFile)) {
-    GTMLoggerDebug(@"Couldn't unlink config file %s - %s",
-                   configFile,
-                   strerror(errno));
-  }
+//  if (unlink(configFile)) {
+//    NSLog(@"Couldn't unlink config file %s - %s",
+//                   configFile,
+//                   strerror(errno));
+//  }
 
   if (fileId == -1) {
     return nil;
   }
 
   NSMutableDictionary *config = [NSMutableDictionary dictionary];
+  [config setObject:[NSString stringWithUTF8String:configFile] forKey:@"CONFIG_FILE"];
 
   while (1) {
     NSString *key = readString(fileId);
@@ -127,13 +130,20 @@ NSDictionary *readConfigurationData(const char *configFile) {
   }
 
   close(fileId);
+    
+    std::string temp = configFile;
+    std::string::size_type pos = temp.rfind('/');
+    std::string dumpDir = temp.substr(0, pos);
+    NSString* value = [NSString stringWithUTF8String:dumpDir.c_str()];
+    [config setObject:value forKey:@kReporterMinidumpDirectoryKey];
+    
   return config;
 }
 }  // namespace
 
 #pragma mark -
 
-@interface Uploader(PrivateMethods)
+@interface BaseBugReportUploader(PrivateMethods)
 
 // Update |parameters_| as well as the server parameters using |config|.
 - (void)translateConfigurationData:(NSDictionary *)config;
@@ -170,10 +180,11 @@ NSDictionary *readConfigurationData(const char *configFile) {
 - (void)logUploadWithID:(const char *)uploadID;
 @end
 
-@implementation Uploader
+@implementation BaseBugReportUploader
 
 //=============================================================================
 - (id)initWithConfigFile:(const char *)configFile {
+    configFile_ = configFile;
   NSDictionary *config = readConfigurationData(configFile);
   if (!config)
     return nil;
@@ -192,13 +203,20 @@ NSDictionary *readConfigurationData(const char *configFile) {
     if (![ud boolForKey:kApplePrefsSyncExcludeAllKey]) {
       [ud setBool:YES forKey:kApplePrefsSyncExcludeAllKey];
     }
+      
+    id value = [config objectForKey:@"CONFIG_FILE"];
+      if ([value isKindOfClass:[NSString class]])
+      {
+          NSString* temp = (NSString*)value;
+          configFile_ = [temp UTF8String];
+      }
 
     [self createServerParameterDictionaries];
 
     [self translateConfigurationData:config];
 
     // Read the minidump into memory.
-    [self readMinidumpData];
+    // [self readMinidumpData];
     [self readLogFileData];
   }
   return self;
@@ -354,7 +372,8 @@ NSDictionary *readConfigurationData(const char *configFile) {
   NSString *logTarFile = [NSString stringWithFormat:@"%s/log.tar.bz2",tmpDir];
   logFileData_ = [[NSData alloc] initWithContentsOfFile:logTarFile];
   if (logFileData_ == nil) {
-    GTMLoggerDebug(@"Cannot find temp tar log file: %@", logTarFile);
+    // GTMLoggerDebug(@"Cannot find temp tar log file: %@", logTarFile);
+      NSLog(@"Cannot find temp tar log file: %@", logTarFile);
     return NO;
   }
   return YES;
@@ -388,7 +407,7 @@ NSDictionary *readConfigurationData(const char *configFile) {
     }
   } else {
       fprintf(stderr, "Breakpad Uploader: unable to determine minidump " \
-              "file length\n");
+              "file length:%d-%s\n", errno, strerror(errno));
       success = NO;
   }
 
@@ -520,12 +539,12 @@ NSDictionary *readConfigurationData(const char *configFile) {
   const char *dest = [destString fileSystemRepresentation];
 
   if (rename(src, dest) == 0) {
-    GTMLoggerInfo(@"Breakpad Uploader: Renamed %s to %s after successful " \
+    NSLog(@"Breakpad Uploader: Renamed %s to %s after successful " \
                   "upload",src, dest);
   }
   else {
     // can't rename - don't worry - it's not important for users
-    GTMLoggerDebug(@"Breakpad Uploader: successful upload report ID = %s\n",
+    NSLog(@"Breakpad Uploader: successful upload report ID = %s\n",
                    reportID );
   }
   [result release];
@@ -619,6 +638,10 @@ NSDictionary *readConfigurationData(const char *configFile) {
 //=============================================================================
 - (NSMutableDictionary *)parameters {
   return parameters_;
+}
+
+- (const char*)getConfigFile{
+    return configFile_.c_str();
 }
 
 //=============================================================================

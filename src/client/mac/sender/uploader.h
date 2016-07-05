@@ -35,6 +35,7 @@
 #include <Foundation/Foundation.h>
 
 #import "common/mac/GTMDefines.h"
+#import <string>
 
 #define kClientIdPreferenceKey @"clientid"
 
@@ -42,7 +43,7 @@ extern NSString *const kGoogleServerType;
 extern NSString *const kSocorroServerType;
 extern NSString *const kDefaultServerType;
 
-@interface Uploader : NSObject {
+@interface BaseBugReportUploader : NSObject {
  @private
   NSMutableDictionary *parameters_;        // Key value pairs of data (STRONG)
   NSData *minidumpContents_;               // The data in the minidump (STRONG)
@@ -61,6 +62,7 @@ extern NSString *const kDefaultServerType;
                                            // that are uploaded to the
                                            // crash server with the
                                            // minidump.
+    std::string configFile_;
 }
 
 - (id)initWithConfigFile:(const char *)configFile;
@@ -72,6 +74,8 @@ extern NSString *const kDefaultServerType;
 + (NSDictionary *)readConfigurationDataFromFile:(NSString *)configFile;
 
 - (NSMutableDictionary *)parameters;
+
+- (const char*)getConfigFile;
 
 - (void)report;
 

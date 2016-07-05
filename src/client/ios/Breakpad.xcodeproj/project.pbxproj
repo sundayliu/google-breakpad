@@ -33,8 +33,6 @@
 		16C7CE1A147D4A4300776EAD /* minidump_file_writer.h in Headers */ = {isa = PBXBuildFile; fileRef = 16C7CC06147D4A4300776EAD /* minidump_file_writer.h */; };
 		16C7CE40147D4A4300776EAD /* convert_UTF.c in Sources */ = {isa = PBXBuildFile; fileRef = 16C7CC4A147D4A4300776EAD /* convert_UTF.c */; };
 		16C7CE41147D4A4300776EAD /* convert_UTF.h in Headers */ = {isa = PBXBuildFile; fileRef = 16C7CC4B147D4A4300776EAD /* convert_UTF.h */; };
-		16C7CE78147D4A4300776EAD /* GTMLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 16C7CC88147D4A4300776EAD /* GTMLogger.h */; };
-		16C7CE79147D4A4300776EAD /* GTMLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 16C7CC89147D4A4300776EAD /* GTMLogger.m */; };
 		16C7CE7A147D4A4300776EAD /* HTTPMultipartUpload.h in Headers */ = {isa = PBXBuildFile; fileRef = 16C7CC8A147D4A4300776EAD /* HTTPMultipartUpload.h */; };
 		16C7CE7B147D4A4300776EAD /* HTTPMultipartUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 16C7CC8B147D4A4300776EAD /* HTTPMultipartUpload.m */; };
 		16C7CE83147D4A4300776EAD /* file_id.cc in Sources */ = {isa = PBXBuildFile; fileRef = 16C7CC93147D4A4300776EAD /* file_id.cc */; };
@@ -55,6 +53,12 @@
 		16C92FAE150DF8330053D7BA /* BreakpadController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 16C92FAC150DF8330053D7BA /* BreakpadController.mm */; };
 		1EEEB60F1720821900F7E689 /* simple_string_dictionary.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EEEB60C1720821900F7E689 /* simple_string_dictionary.cc */; };
 		1EEEB6101720821900F7E689 /* simple_string_dictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EEEB60D1720821900F7E689 /* simple_string_dictionary.h */; };
+		8FF1A0BC1D2A886800EBC88F /* common_macros.h in Headers */ = {isa = PBXBuildFile; fileRef = 8FF1A0B81D2A886800EBC88F /* common_macros.h */; };
+		8FF1A0BD1D2A886800EBC88F /* platform_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8FF1A0B91D2A886800EBC88F /* platform_config.h */; };
+		8FF1A0C01D2A8A1200EBC88F /* breakpad_client.h in Headers */ = {isa = PBXBuildFile; fileRef = 8FF1A0BE1D2A8A1200EBC88F /* breakpad_client.h */; };
+		8FF1A0C11D2A8A1200EBC88F /* breakpad_client.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8FF1A0BF1D2A8A1200EBC88F /* breakpad_client.mm */; };
+		8FF1A0D41D2B5E8200EBC88F /* tqm_uploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 8FF1A0D21D2B5E8200EBC88F /* tqm_uploader.h */; };
+		8FF1A0D51D2B5E8200EBC88F /* tqm_uploader.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8FF1A0D31D2B5E8200EBC88F /* tqm_uploader.mm */; };
 		AA747D9F0F9514B9006C5449 /* Breakpad_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* Breakpad_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -87,8 +91,6 @@
 		16C7CC07147D4A4300776EAD /* minidump_file_writer_unittest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = minidump_file_writer_unittest.cc; sourceTree = "<group>"; };
 		16C7CC4A147D4A4300776EAD /* convert_UTF.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = convert_UTF.c; sourceTree = "<group>"; };
 		16C7CC4B147D4A4300776EAD /* convert_UTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = convert_UTF.h; sourceTree = "<group>"; };
-		16C7CC88147D4A4300776EAD /* GTMLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMLogger.h; sourceTree = "<group>"; };
-		16C7CC89147D4A4300776EAD /* GTMLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GTMLogger.m; sourceTree = "<group>"; };
 		16C7CC8A147D4A4300776EAD /* HTTPMultipartUpload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPMultipartUpload.h; sourceTree = "<group>"; };
 		16C7CC8B147D4A4300776EAD /* HTTPMultipartUpload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTTPMultipartUpload.m; sourceTree = "<group>"; };
 		16C7CC93147D4A4300776EAD /* file_id.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_id.cc; sourceTree = "<group>"; };
@@ -109,6 +111,12 @@
 		16C92FAC150DF8330053D7BA /* BreakpadController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BreakpadController.mm; sourceTree = "<group>"; };
 		1EEEB60C1720821900F7E689 /* simple_string_dictionary.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simple_string_dictionary.cc; sourceTree = "<group>"; };
 		1EEEB60D1720821900F7E689 /* simple_string_dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_string_dictionary.h; sourceTree = "<group>"; };
+		8FF1A0B81D2A886800EBC88F /* common_macros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common_macros.h; path = ../../common_macros.h; sourceTree = "<group>"; };
+		8FF1A0B91D2A886800EBC88F /* platform_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = platform_config.h; path = ../../platform_config.h; sourceTree = "<group>"; };
+		8FF1A0BE1D2A8A1200EBC88F /* breakpad_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = breakpad_client.h; sourceTree = "<group>"; };
+		8FF1A0BF1D2A8A1200EBC88F /* breakpad_client.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = breakpad_client.mm; sourceTree = "<group>"; };
+		8FF1A0D21D2B5E8200EBC88F /* tqm_uploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tqm_uploader.h; sourceTree = "<group>"; };
+		8FF1A0D31D2B5E8200EBC88F /* tqm_uploader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = tqm_uploader.mm; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* Breakpad_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Breakpad_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D2AAC07E0554694100DB518D /* libBreakpad.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBreakpad.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -156,6 +164,8 @@
 		08FB77AEFE84172EC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				8FF1A0B81D2A886800EBC88F /* common_macros.h */,
+				8FF1A0B91D2A886800EBC88F /* platform_config.h */,
 				16C7C965147D4A4200776EAD /* client */,
 				16C7CC47147D4A4300776EAD /* common */,
 			);
@@ -205,6 +215,8 @@
 		16C7C969147D4A4200776EAD /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				8FF1A0BE1D2A8A1200EBC88F /* breakpad_client.h */,
+				8FF1A0BF1D2A8A1200EBC88F /* breakpad_client.mm */,
 				16C92FAB150DF8330053D7BA /* BreakpadController.h */,
 				16C92FAC150DF8330053D7BA /* BreakpadController.mm */,
 				16BFA66A14E195E9009704F8 /* handler */,
@@ -255,6 +267,8 @@
 		16C7CBC8147D4A4300776EAD /* sender */ = {
 			isa = PBXGroup;
 			children = (
+				8FF1A0D21D2B5E8200EBC88F /* tqm_uploader.h */,
+				8FF1A0D31D2B5E8200EBC88F /* tqm_uploader.mm */,
 				16C7CBEA147D4A4300776EAD /* uploader.h */,
 				16C7CBEB147D4A4300776EAD /* uploader.mm */,
 			);
@@ -281,8 +295,6 @@
 		16C7CC82147D4A4300776EAD /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				16C7CC88147D4A4300776EAD /* GTMLogger.h */,
-				16C7CC89147D4A4300776EAD /* GTMLogger.m */,
 				16C7CC8A147D4A4300776EAD /* HTTPMultipartUpload.h */,
 				16C7CC8B147D4A4300776EAD /* HTTPMultipartUpload.m */,
 				16C7CC93147D4A4300776EAD /* file_id.cc */,
@@ -319,6 +331,7 @@
 				16C7CCCC147D4A4300776EAD /* Breakpad.h in Headers */,
 				16C7CDE8147D4A4300776EAD /* ConfigFile.h in Headers */,
 				14569321182CE29F0029C465 /* ucontext_compat.h in Headers */,
+				8FF1A0C01D2A8A1200EBC88F /* breakpad_client.h in Headers */,
 				16C7CDF6147D4A4300776EAD /* breakpad_nlist_64.h in Headers */,
 				16C7CDF8147D4A4300776EAD /* dynamic_images.h in Headers */,
 				16C7CDFA147D4A4300776EAD /* exception_handler.h in Headers */,
@@ -327,8 +340,8 @@
 				16C7CE08147D4A4300776EAD /* uploader.h in Headers */,
 				16C7CE18147D4A4300776EAD /* minidump_file_writer-inl.h in Headers */,
 				16C7CE1A147D4A4300776EAD /* minidump_file_writer.h in Headers */,
+				8FF1A0BD1D2A886800EBC88F /* platform_config.h in Headers */,
 				16C7CE41147D4A4300776EAD /* convert_UTF.h in Headers */,
-				16C7CE78147D4A4300776EAD /* GTMLogger.h in Headers */,
 				16C7CE7A147D4A4300776EAD /* HTTPMultipartUpload.h in Headers */,
 				16C7CE84147D4A4300776EAD /* file_id.h in Headers */,
 				16C7CE86147D4A4300776EAD /* macho_id.h in Headers */,
@@ -336,11 +349,13 @@
 				16C7CE8D147D4A4300776EAD /* macho_walker.h in Headers */,
 				16C7CE90147D4A4300776EAD /* string_utilities.h in Headers */,
 				16C7CE94147D4A4300776EAD /* md5.h in Headers */,
+				8FF1A0BC1D2A886800EBC88F /* common_macros.h in Headers */,
 				16C7CEA8147D4A4300776EAD /* string_conversion.h in Headers */,
 				16BFA67014E195E9009704F8 /* ios_exception_minidump_generator.h in Headers */,
 				16C92FAD150DF8330053D7BA /* BreakpadController.h in Headers */,
 				1EEEB6101720821900F7E689 /* simple_string_dictionary.h in Headers */,
 				14569323182CE2C10029C465 /* mach_vm_compat.h in Headers */,
+				8FF1A0D41D2B5E8200EBC88F /* tqm_uploader.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,13 +427,14 @@
 				16C7CDE9147D4A4300776EAD /* ConfigFile.mm in Sources */,
 				16C7CDF5147D4A4300776EAD /* breakpad_nlist_64.cc in Sources */,
 				16C7CDF7147D4A4300776EAD /* dynamic_images.cc in Sources */,
+				8FF1A0D51D2B5E8200EBC88F /* tqm_uploader.mm in Sources */,
 				16C7CDF9147D4A4300776EAD /* exception_handler.cc in Sources */,
 				16C7CDFC147D4A4300776EAD /* minidump_generator.cc in Sources */,
+				8FF1A0C11D2A8A1200EBC88F /* breakpad_client.mm in Sources */,
 				16C7CDFE147D4A4300776EAD /* protected_memory_allocator.cc in Sources */,
 				16C7CE09147D4A4300776EAD /* uploader.mm in Sources */,
 				16C7CE19147D4A4300776EAD /* minidump_file_writer.cc in Sources */,
 				16C7CE40147D4A4300776EAD /* convert_UTF.c in Sources */,
-				16C7CE79147D4A4300776EAD /* GTMLogger.m in Sources */,
 				16C7CE7B147D4A4300776EAD /* HTTPMultipartUpload.m in Sources */,
 				16C7CE83147D4A4300776EAD /* file_id.cc in Sources */,
 				16C7CE85147D4A4300776EAD /* macho_id.cc in Sources */,
@@ -463,6 +479,7 @@
 					"\"$(SRCROOT)/../mac/build/Debug\"",
 					"\"$(SRCROOT)/../mac/gcov\"",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = Breakpad;
 			};
 			name = Debug;
@@ -491,6 +508,7 @@
 					"\"$(SRCROOT)/../mac/build/Debug\"",
 					"\"$(SRCROOT)/../mac/gcov\"",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = Breakpad;
 			};
 			name = Release;

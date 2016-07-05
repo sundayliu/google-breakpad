@@ -41,7 +41,7 @@
 #import "client/mac/crash_generation/ConfigFile.h"
 #import "client/mac/handler/exception_handler.h"
 #import "client/mac/handler/minidump_generator.h"
-#import "client/mac/sender/uploader.h"
+#import "client/mac/sender/tqm_uploader.h"
 #import "client/mac/handler/protected_memory_allocator.h"
 #import "common/simple_string_dictionary.h"
 
@@ -456,14 +456,14 @@ NSString *Breakpad::NextCrashReportToUpload() {
 
 //=============================================================================
 NSDictionary *Breakpad::NextCrashReportConfiguration() {
-  return [Uploader readConfigurationDataFromFile:NextCrashReportToUpload()];
+  return [BugReportUploader readConfigurationDataFromFile:NextCrashReportToUpload()];
 }
 
 //=============================================================================
 void Breakpad::HandleNetworkResponse(NSDictionary *configuration,
                                      NSData *data,
                                      NSError *error) {
-  Uploader *uploader = [[[Uploader alloc]
+  BugReportUploader *uploader = [[[BugReportUploader alloc]
       initWithConfig:configuration] autorelease];
   [uploader handleNetworkResponse:data withError:error];
 }
@@ -471,7 +471,7 @@ void Breakpad::HandleNetworkResponse(NSDictionary *configuration,
 //=============================================================================
 void Breakpad::UploadReportWithConfiguration(NSDictionary *configuration,
                                              NSDictionary *server_parameters) {
-  Uploader *uploader = [[[Uploader alloc]
+  BugReportUploader *uploader = [[[BugReportUploader alloc]
       initWithConfig:configuration] autorelease];
   if (!uploader)
     return;
@@ -501,8 +501,8 @@ void Breakpad::UploadData(NSData *data, NSString *name,
               forKey:[NSString stringWithUTF8String:next->key]];
   }
 
-  Uploader *uploader =
-      [[[Uploader alloc] initWithConfig:config] autorelease];
+  BugReportUploader *uploader =
+      [[[BugReportUploader alloc] initWithConfig:config] autorelease];
   for (NSString *key in server_parameters) {
     [uploader addServerParameter:[server_parameters objectForKey:key]
                           forKey:key];
