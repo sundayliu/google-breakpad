@@ -65,6 +65,7 @@ const int kMinidumpFileLengthLimit = 2 * 1024 * 1024;  // 2MB
         bool ret = NS_GOOGLE_BREAKPAD::g_callback_bsd_exception(fileName);
         if (ret)
         {
+            printf("[uploader]send dump info success");
             remove(fileName);
             remove(configFile);
         }
