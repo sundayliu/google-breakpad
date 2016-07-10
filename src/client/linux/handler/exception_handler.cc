@@ -373,11 +373,13 @@ void ExceptionHandler::SignalHandler(int sig, siginfo_t* info, void* uc) {
   // successfully, restore the default handler. Otherwise, restore the
   // previously installed handler. Then, when the signal is retriggered, it will
   // be delivered to the appropriate handler.
-  if (handled) {
-    InstallDefaultHandler(sig);
-  } else {
+  //if (handled) {
+  //  InstallDefaultHandler(sig);
+  //} else {
+  //  RestoreHandlersLocked();
+  //}
+
     RestoreHandlersLocked();
-  }
 
   pthread_mutex_unlock(&g_handler_stack_mutex_);
 
