@@ -13,7 +13,7 @@ void install_breakpad(size_t size_limit, PFN_UPLOAD_NSEXCEPTION_CALLBACK cbNSExc
     [[BreakpadController sharedInstance] setUploadInterval:5*60];
     [[BreakpadController sharedInstance] setUploadingURL:@"upload.qq.com"];
     [[BreakpadController sharedInstance] start:YES];
-    [[BreakpadController sharedInstance] setUploadingEnabled:YES];
+    [[BreakpadController sharedInstance] setUploadingEnabled:NO];
     
 }
 
