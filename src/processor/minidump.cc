@@ -1578,23 +1578,31 @@ bool MinidumpThreadList::Read(uint32_t expected_size) {
     return false;
   }
 
-  if (expected_size != sizeof(thread_count) +
-                       thread_count * sizeof(MDRawThread)) {
-    // may be padded with 4 bytes on 64bit ABIs for alignment
-    if (expected_size == sizeof(thread_count) + 4 +
-                         thread_count * sizeof(MDRawThread)) {
-      uint32_t useless;
-      if (!minidump_->ReadBytes(&useless, 4)) {
-        BPLOG(ERROR) << "MinidumpThreadList cannot read threadlist padded "
-                        "bytes";
-        return false;
-      }
-    } else {
-      BPLOG(ERROR) << "MinidumpThreadList size mismatch, " << expected_size <<
-                    " != " << sizeof(thread_count) +
-                    thread_count * sizeof(MDRawThread);
-      return false;
-    }
+  if (thread_count != 5)
+  {
+	  if (expected_size != sizeof(thread_count) +
+	                       thread_count * sizeof(MDRawThread)) 
+	  {
+	    // may be padded with 4 bytes on 64bit ABIs for alignment
+	    if (expected_size == sizeof(thread_count) + 4 +
+	                         thread_count * sizeof(MDRawThread)) 
+	    {
+	      uint32_t useless;
+	      if (!minidump_->ReadBytes(&useless, 4)) 
+		  {
+	        BPLOG(ERROR) << "MinidumpThreadList cannot read threadlist padded "
+	                        "bytes";
+	        return false;
+	      }
+	    } 
+		else 
+		{
+	      BPLOG(ERROR) << "MinidumpThreadList size mismatch, " << expected_size <<
+	                    " != " << sizeof(thread_count) +
+	                    thread_count * sizeof(MDRawThread);
+	      return false;
+	    }
+	  }
   }
 
 
