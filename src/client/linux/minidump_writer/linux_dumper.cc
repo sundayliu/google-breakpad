@@ -53,11 +53,11 @@
 #include "third_party/lss/linux_syscall_support.h"
 #include "client/linux/log/log.h"
 
-#include <android/log.h>
+// #include <android/log.h>
 
 
 #if defined(__ANDROID__)
-
+#include <android/log.h>
 // Android packed relocations definitions are not yet available from the
 // NDK header files, so we have to provide them manually here.
 #ifndef DT_LOOS
@@ -109,18 +109,18 @@ LinuxDumper::~LinuxDumper() {
 }
 
 bool LinuxDumper::Init() {
-	bool result = false;
+	//bool result = false;
 	bool result1 = false;
 	bool result2 = false;
 	bool result3 = false;
 	result1 = ReadAuxv();
-	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv():%d\n", result1);
+	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv():%d\n", result1);
 
 	result2 = EnumerateMappings();
-	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateMappings() :%d\n", result2);
+	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateMappings() :%d\n", result2);
 	
 	result3 = EnumerateThreads();
-	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateThreads():%d\n", result3);
+	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateThreads():%d\n", result3);
 
 	return result1 && result2 && result3;
   //return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
@@ -308,7 +308,7 @@ bool LinuxDumper::ReadAuxv() {
     return false;
   }
 
-  __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
+  // __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
 
   elf_aux_entry one_aux_entry;
   bool res = false;
@@ -316,7 +316,7 @@ bool LinuxDumper::ReadAuxv() {
                   &one_aux_entry,
                   sizeof(elf_aux_entry)) == sizeof(elf_aux_entry) &&
          one_aux_entry.a_type != AT_NULL) {
-         __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
+        // __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
     if (one_aux_entry.a_type <= AT_MAX) {
       auxv_[one_aux_entry.a_type] = one_aux_entry.a_un.a_val;
       res = true;
@@ -333,6 +333,7 @@ bool LinuxDumper::EnumerateMappings() {
   if (!BuildProcPath(maps_path, pid_, "maps"))
     return false;
 
+  /*
   FILE* fp = fopen(maps_path, "r");
   if (fp != NULL){
   	fseek(fp, 0, SEEK_END);
@@ -348,6 +349,7 @@ bool LinuxDumper::EnumerateMappings() {
   else{
 	printf("error:%d:%s\n", errno, strerror(errno));
   }
+  */
 
   // linux_gate_loc is the beginning of the kernel's mapping of
   // linux-gate.so in the process.  It doesn't actually show up in the
@@ -358,20 +360,20 @@ bool LinuxDumper::EnumerateMappings() {
   // information.
   const void* linux_gate_loc =
       reinterpret_cast<void *>(auxv_[AT_SYSINFO_EHDR]);
-  printf("vDSO address:%p\n", linux_gate_loc);
+  // printf("vDSO address:%p\n", linux_gate_loc);
   // Although the initial executable is usually the first mapping, it's not
   // guaranteed (see http://crosbug.com/25355); therefore, try to use the
   // actual entry point to find the mapping.
   const void* entry_point_loc = reinterpret_cast<void *>(auxv_[AT_ENTRY]);
-  printf("entry point loc:%p\n", entry_point_loc);
+  //printf("entry point loc:%p\n", entry_point_loc);
 
   const int fd = sys_open(maps_path, O_RDONLY, 0);
-  printf("map path:%s\n", maps_path);
+  //printf("map path:%s\n", maps_path);
   if (fd < 0)
     return false;
   LineReader* const line_reader = new(allocator_) LineReader(fd);
 
-  printf("open %s success fd:%d\n", maps_path, fd);
+  //printf("open %s success fd:%d\n", maps_path, fd);
   const char* line;
   unsigned line_len;
   while (line_reader->GetNextLine(&line, &line_len)) {
@@ -395,12 +397,12 @@ bool LinuxDumper::EnumerateMappings() {
           }
 
 		  if (name != NULL){
-			printf("mapings name:%s\n", name);
+			// printf("mapings name:%s\n", name);
 		  }
           // Merge adjacent mappings with the same name into one module,
           // assuming they're a single library mapped by the dynamic linker
           if (name && !mappings_.empty()) {
-		  	printf("mapings 1\n");
+		  	//printf("mapings 1\n");
 			// same name back
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
@@ -416,7 +418,7 @@ bool LinuxDumper::EnumerateMappings() {
           // appear as an anonymous private mapping with no access flags set
           // and which directly follow an executable mapping.
           if (!name && !mappings_.empty()) {
-		  	printf("mapping 2\n");
+		  	//printf("mapping 2\n");
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
                 module->exec &&

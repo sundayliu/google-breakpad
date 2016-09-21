@@ -96,9 +96,10 @@
 #include "client/linux/minidump_writer/minidump_writer.h"
 #include "common/linux/eintr_wrapper.h"
 #include "third_party/lss/linux_syscall_support.h"
-#include <android/log.h>
+// #include <android/log.h>
 
 #if defined(__ANDROID__)
+#include <android/log.h>
 #include "linux/sched.h"
 #endif
 
@@ -402,7 +403,7 @@ struct ThreadArgument {
 // context here: see the top of the file.
 // static
 int ExceptionHandler::ThreadEntry(void *arg) {
-	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "pid:%d,uid:%d,gid:%d", getpid(), getuid(), getgid());
+	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "pid:%d,uid:%d,gid:%d", getpid(), getuid(), getgid());
 
   const ThreadArgument *thread_arg = reinterpret_cast<ThreadArgument*>(arg);
 
@@ -417,7 +418,7 @@ int ExceptionHandler::ThreadEntry(void *arg) {
 // This function runs in a compromised context: see the top of the file.
 // Runs on the crashing thread.
 bool ExceptionHandler::HandleSignal(int sig, siginfo_t* info, void* uc) {
-  printf("HandleSignal %d:%d\n", getpid(), gettid());
+  //printf("HandleSignal %d:%d\n", getpid(), gettid());
   if (filter_ && !filter_(callback_context_))
     return false;
 
@@ -515,9 +516,11 @@ bool ExceptionHandler::GenerateDump(CrashContext *context) {
     fdes[0] = fdes[1] = -1;
   }
 
-
+#if defined (__ANDROID__)
 	__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "pid:%d,uid:%d,gid:%d", getpid(), getuid(), getgid());
-  const pid_t child = sys_clone(
+#endif
+
+ const pid_t child = sys_clone(
       ThreadEntry, stack, CLONE_FILES | CLONE_FS | CLONE_UNTRACED,
       &thread_arg, NULL, NULL, NULL);
   if (child == -1) {
