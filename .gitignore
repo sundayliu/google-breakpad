@@ -79,3 +79,4 @@ src/tools/gyp
 *.DS_Store
 xcuserdata/
 Build/
+*.so
