@@ -33,9 +33,9 @@
 //
 // Author: Ben Wagner
 
-#include <cstdio>
 #include <string>
 
+#include "common/stdio_wrapper.h"
 #include "google_breakpad/common/breakpad_types.h"
 #include "google_breakpad/common/minidump_exception_win32.h"
 #include "processor/symbolic_constants_win.h"

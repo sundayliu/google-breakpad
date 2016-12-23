@@ -39,9 +39,6 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "minidump_file_writer-inl.h"
 
@@ -78,19 +75,13 @@ static bool WriteFile(const char *path) {
   if (writer.Open(path)) {
     // Test a single structure
     google_breakpad::TypedMDRVA<StringStructure> strings(&writer);
-
-	DEBUG_LOG("---test single object\n");
     ASSERT_TRUE(strings.Allocate());
     strings.get()->integer_value = 0xBEEF;
     const char *first = "First String";
     ASSERT_TRUE(writer.WriteString(first, 0, &strings.get()->first_string));
-
-	DEBUG_LOG("first:%d,%d\n", strings.get()->first_string.data_size, strings.get()->first_string.rva);
     const wchar_t *second = L"Second String";
     ASSERT_TRUE(writer.WriteString(second, 0, &strings.get()->second_string));
-	DEBUG_LOG("second:%d,%d\n", strings.get()->second_string.data_size, strings.get()->second_string.rva);
 
-	DEBUG_LOG("---test array\n");
     // Test an array structure
     google_breakpad::TypedMDRVA<ArrayStructure> array(&writer);
     unsigned int count = 10;
@@ -102,8 +93,6 @@ static bool WriteFile(const char *path) {
       local.long_value = i + 2;
       ASSERT_TRUE(array.CopyIndex(i, &local));
     }
-
-	DEBUG_LOG("---test object and array\n");
 
     // Test an object followed by an array
     google_breakpad::TypedMDRVA<ObjectAndArrayStructure> obj_array(&writer);
@@ -158,13 +147,9 @@ static bool CompareFile(const char *path) {
   size_t expected_byte_count = sizeof(expected);
   int fd = open(path, O_RDONLY, 0600);
   void *buffer = malloc(expected_byte_count);
-
-  DEBUG_LOG("expected byte count:%d\n", expected_byte_count);
   ASSERT_NE(fd, -1);
   ASSERT_TRUE(buffer);
-  size_t read_size = read(fd, buffer, expected_byte_count);
-  DEBUG_LOG("read size:%d\n", read_size);
-  ASSERT_EQ(read_size, 
+  ASSERT_EQ(read(fd, buffer, expected_byte_count), 
             static_cast<ssize_t>(expected_byte_count));
 
   char *b1, *b2;
@@ -183,7 +168,6 @@ static bool CompareFile(const char *path) {
 
 static bool RunTests() {
   const char *path = "/tmp/minidump_file_writer_unittest.dmp";
-  remove(path);
   ASSERT_TRUE(WriteFile(path));
   ASSERT_TRUE(CompareFile(path));
   unlink(path);

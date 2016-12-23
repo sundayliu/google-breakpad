@@ -71,15 +71,15 @@ LOCAL_ARM_MODE := arm
 # List of client source files, directly taken from Makefile.am
 LOCAL_SRC_FILES := \
     src/client/linux/crash_generation/crash_generation_client.cc \
+    src/client/linux/dump_writer_common/thread_info.cc \
+    src/client/linux/dump_writer_common/ucontext_reader.cc \
     src/client/linux/handler/exception_handler.cc \
     src/client/linux/handler/minidump_descriptor.cc \
     src/client/linux/log/log.cc \
+    src/client/linux/microdump_writer/microdump_writer.cc \
     src/client/linux/minidump_writer/linux_dumper.cc \
     src/client/linux/minidump_writer/linux_ptrace_dumper.cc \
     src/client/linux/minidump_writer/minidump_writer.cc \
-    src/client/linux/microdump_writer/microdump_writer.cc \
-    src/client/linux/dump_writer_common/thread_info.cc \
-    src/client/linux/dump_writer_common/ucontext_reader.cc \
     src/client/minidump_file_writer.cc \
     src/common/android/breakpad_getcontext.S \
     src/common/convert_UTF.c \
@@ -90,16 +90,13 @@ LOCAL_SRC_FILES := \
     src/common/linux/guid_creator.cc \
     src/common/linux/linux_libc_support.cc \
     src/common/linux/memory_mapped_file.cc \
-    src/common/linux/safe_readlink.cc \
-    src/breakpad_client.cc
+    src/common/linux/safe_readlink.cc
 
 LOCAL_C_INCLUDES        := $(LOCAL_PATH)/src/common/android/include \
                            $(LOCAL_PATH)/src
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES)
 LOCAL_EXPORT_LDLIBS     := -llog
-LOCAL_CPPFLAGS += -std=c++11 -D__STDC_LIMIT_MACROS
-LOCAL_CFLAGS += -fvisibility=hidden
 
 include $(BUILD_STATIC_LIBRARY)
 

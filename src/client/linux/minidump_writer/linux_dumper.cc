@@ -51,13 +51,9 @@
 #include "common/linux/memory_mapped_file.h"
 #include "common/linux/safe_readlink.h"
 #include "third_party/lss/linux_syscall_support.h"
-#include "client/linux/log/log.h"
-
-// #include <android/log.h>
-
 
 #if defined(__ANDROID__)
-#include <android/log.h>
+
 // Android packed relocations definitions are not yet available from the
 // NDK header files, so we have to provide them manually here.
 #ifndef DT_LOOS
@@ -74,7 +70,6 @@ static const int DT_ANDROID_RELA = DT_LOOS + 4;
 
 static const char kMappedFileUnsafePrefix[] = "/dev/";
 static const char kDeletedSuffix[] = " (deleted)";
-static const char kReservedFlags[] = " ---p";
 
 inline static bool IsMappedFileOpenUnsafe(
     const google_breakpad::MappingInfo& mapping) {
@@ -89,17 +84,186 @@ inline static bool IsMappedFileOpenUnsafe(
 
 namespace google_breakpad {
 
+#if defined(__CHROMEOS__)
+
+namespace {
+
+// Recover memory mappings before writing dump on ChromeOS
+//
+// On Linux, breakpad relies on /proc/[pid]/maps to associate symbols from
+// addresses. ChromeOS' hugepage implementation replaces some segments with
+// anonymous private pages, which is a restriction of current implementation
+// in Linux kernel at the time of writing. Thus, breakpad can no longer
+// symbolize addresses from those text segments replaced with hugepages.
+//
+// This postprocess tries to recover the mappings. Because hugepages are always
+// inserted in between some .text sections, it tries to infer the names and
+// offsets of the segments, by looking at segments immediately precede and
+// succeed them.
+//
+// For example, a text segment before hugepage optimization
+//   02001000-03002000 r-xp /opt/google/chrome/chrome
+//
+// can be broken into
+//   02001000-02200000 r-xp /opt/google/chrome/chrome
+//   02200000-03000000 r-xp
+//   03000000-03002000 r-xp /opt/google/chrome/chrome
+//
+// For more details, see:
+// crbug.com/628040 ChromeOS' use of hugepages confuses crash symbolization
+
+// Copied from CrOS' hugepage implementation, which is unlikely to change.
+// The hugepage size is 2M.
+const unsigned int kHpageShift = 21;
+const size_t kHpageSize = (1 << kHpageShift);
+const size_t kHpageMask = (~(kHpageSize - 1));
+
+// Find and merge anonymous r-xp segments with surrounding named segments.
+// There are two cases:
+
+// Case 1: curr, next
+//   curr is anonymous
+//   curr is r-xp
+//   curr.size >= 2M
+//   curr.size is a multiple of 2M.
+//   next is backed by some file.
+//   curr and next are contiguous.
+//   offset(next) == sizeof(curr)
+void TryRecoverMappings(MappingInfo *curr, MappingInfo *next) {
+  // Merged segments are marked with size = 0.
+  if (curr->size == 0 || next->size == 0)
+    return;
+
+  if (curr->size >= kHpageSize &&
+      curr->exec &&
+      (curr->size & kHpageMask) == curr->size &&
+      (curr->start_addr & kHpageMask) == curr->start_addr &&
+      curr->name[0] == '\0' &&
+      next->name[0] != '\0' &&
+      curr->start_addr + curr->size == next->start_addr &&
+      curr->size == next->offset) {
+
+    // matched
+    my_strlcpy(curr->name, next->name, NAME_MAX);
+    if (next->exec) {
+      // (curr, next)
+      curr->size += next->size;
+      next->size = 0;
+    }
+  }
+}
+
+// Case 2: prev, curr, next
+//   curr is anonymous
+//   curr is r-xp
+//   curr.size >= 2M
+//   curr.size is a multiple of 2M.
+//   next and prev are backed by the same file.
+//   prev, curr and next are contiguous.
+//   offset(next) == offset(prev) + sizeof(prev) + sizeof(curr)
+void TryRecoverMappings(MappingInfo *prev, MappingInfo *curr,
+    MappingInfo *next) {
+  // Merged segments are marked with size = 0.
+  if (prev->size == 0 || curr->size == 0 || next->size == 0)
+    return;
+
+  if (curr->size >= kHpageSize &&
+      curr->exec &&
+      (curr->size & kHpageMask) == curr->size &&
+      (curr->start_addr & kHpageMask) == curr->start_addr &&
+      curr->name[0] == '\0' &&
+      next->name[0] != '\0' &&
+      curr->start_addr + curr->size == next->start_addr &&
+      prev->start_addr + prev->size == curr->start_addr &&
+      my_strncmp(prev->name, next->name, NAME_MAX) == 0 &&
+      next->offset == prev->offset + prev->size + curr->size) {
+
+    // matched
+    my_strlcpy(curr->name, prev->name, NAME_MAX);
+    if (prev->exec) {
+      curr->offset = prev->offset;
+      curr->start_addr = prev->start_addr;
+      if (next->exec) {
+        // (prev, curr, next)
+        curr->size += prev->size + next->size;
+        prev->size = 0;
+        next->size = 0;
+      } else {
+        // (prev, curr), next
+        curr->size += prev->size;
+        prev->size = 0;
+      }
+    } else {
+      curr->offset = prev->offset + prev->size;
+      if (next->exec) {
+        // prev, (curr, next)
+        curr->size += next->size;
+        next->size = 0;
+      } else {
+        // prev, curr, next
+      }
+    }
+  }
+}
+
+// mappings_ is sorted excepted for the first entry.
+// This function tries to merge segemnts into the first entry,
+// then check for other sorted entries.
+// See LinuxDumper::EnumerateMappings().
+void CrOSPostProcessMappings(wasteful_vector<MappingInfo*>& mappings) {
+  // Find the candidate "next" to first segment, which is the only one that
+  // could be out-of-order.
+  size_t l = 1;
+  size_t r = mappings.size();
+  size_t next = mappings.size();
+  while (l < r) {
+    int m = (l + r) / 2;
+    if (mappings[m]->start_addr > mappings[0]->start_addr)
+      r = next = m;
+    else
+      l = m + 1;
+  }
+
+  // Try to merge segments into the first.
+  if (next < mappings.size()) {
+    TryRecoverMappings(mappings[0], mappings[next]);
+    if (next - 1 > 0)
+      TryRecoverMappings(mappings[next - 1], mappings[0], mappings[next]);
+  }
+
+  // Iterate through normal, sorted cases.
+  // Normal case 1.
+  for (size_t i = 1; i < mappings.size() - 1; i++)
+    TryRecoverMappings(mappings[i], mappings[i + 1]);
+
+  // Normal case 2.
+  for (size_t i = 1; i < mappings.size() - 2; i++)
+    TryRecoverMappings(mappings[i], mappings[i + 1], mappings[i + 2]);
+
+  // Collect merged (size == 0) segments.
+  size_t f, e;
+  for (f = e = 0; e < mappings.size(); e++)
+    if (mappings[e]->size > 0)
+      mappings[f++] = mappings[e];
+  mappings.resize(f);
+}
+
+}  // namespace
+#endif  // __CHROMEOS__
+
 // All interesting auvx entry types are below AT_SYSINFO_EHDR
 #define AT_MAX AT_SYSINFO_EHDR
 
-LinuxDumper::LinuxDumper(pid_t pid)
+LinuxDumper::LinuxDumper(pid_t pid, const char* root_prefix)
     : pid_(pid),
+      root_prefix_(root_prefix),
       crash_address_(0),
       crash_signal_(0),
       crash_thread_(pid),
       threads_(&allocator_, 8),
       mappings_(&allocator_),
       auxv_(&allocator_, AT_MAX + 1) {
+  assert(root_prefix_ && my_strlen(root_prefix_) < PATH_MAX);
   // The passed-in size to the constructor (above) is only a hint.
   // Must call .resize() to do actual initialization of the elements.
   auxv_.resize(AT_MAX + 1);
@@ -109,27 +273,18 @@ LinuxDumper::~LinuxDumper() {
 }
 
 bool LinuxDumper::Init() {
-	//bool result = false;
-	bool result1 = false;
-	bool result2 = false;
-	bool result3 = false;
-	result1 = ReadAuxv();
-	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv():%d\n", result1);
-
-	result2 = EnumerateMappings();
-	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateMappings() :%d\n", result2);
-	
-	result3 = EnumerateThreads();
-	//__android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "EnumerateThreads():%d\n", result3);
-
-	return result1 && result2 && result3;
-  //return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
+  return ReadAuxv() && EnumerateThreads() && EnumerateMappings();
 }
 
 bool LinuxDumper::LateInit() {
 #if defined(__ANDROID__)
   LatePostprocessMappings();
 #endif
+
+#if defined(__CHROMEOS__)
+  CrOSPostProcessMappings(mappings_);
+#endif
+
   return true;
 }
 
@@ -137,9 +292,8 @@ bool
 LinuxDumper::ElfFileIdentifierForMapping(const MappingInfo& mapping,
                                          bool member,
                                          unsigned int mapping_id,
-                                         uint8_t identifier[sizeof(MDGUID)]) {
+                                         wasteful_vector<uint8_t>& identifier) {
   assert(!member || mapping_id < mappings_.size());
-  my_memset(identifier, 0, sizeof(MDGUID));
   if (IsMappedFileOpenUnsafe(mapping))
     return false;
 
@@ -157,14 +311,9 @@ LinuxDumper::ElfFileIdentifierForMapping(const MappingInfo& mapping,
     return FileID::ElfFileIdentifierFromMappedFile(linux_gate, identifier);
   }
 
-  char filename[NAME_MAX];
-  size_t filename_len = my_strlen(mapping.name);
-  if (filename_len >= NAME_MAX) {
-    assert(false);
+  char filename[PATH_MAX];
+  if (!GetMappingAbsolutePath(mapping, filename))
     return false;
-  }
-  my_memcpy(filename, mapping.name, filename_len);
-  filename[filename_len] = '\0';
   bool filename_modified = HandleDeletedFileInMapping(filename);
 
   MemoryMappedFile mapped_file(filename, mapping.offset);
@@ -174,11 +323,17 @@ LinuxDumper::ElfFileIdentifierForMapping(const MappingInfo& mapping,
   bool success =
       FileID::ElfFileIdentifierFromMappedFile(mapped_file.data(), identifier);
   if (success && member && filename_modified) {
-    mappings_[mapping_id]->name[filename_len -
+    mappings_[mapping_id]->name[my_strlen(mapping.name) -
                                 sizeof(kDeletedSuffix) + 1] = '\0';
   }
 
   return success;
+}
+
+bool LinuxDumper::GetMappingAbsolutePath(const MappingInfo& mapping,
+                                         char path[PATH_MAX]) const {
+  return my_strlcpy(path, root_prefix_, PATH_MAX) < PATH_MAX &&
+         my_strlcat(path, mapping.name, PATH_MAX) < PATH_MAX;
 }
 
 namespace {
@@ -230,23 +385,16 @@ bool ElfFileSoNameFromMappedFile(
 // for |mapping|. If the SONAME is found copy it into the passed buffer
 // |soname| and return true. The size of the buffer is |soname_size|.
 // The SONAME will be truncated if it is too long to fit in the buffer.
-bool ElfFileSoName(
+bool ElfFileSoName(const LinuxDumper& dumper,
     const MappingInfo& mapping, char* soname, size_t soname_size) {
   if (IsMappedFileOpenUnsafe(mapping)) {
     // Not safe
     return false;
   }
 
-  char filename[NAME_MAX];
-  size_t filename_len = my_strlen(mapping.name);
-  if (filename_len >= NAME_MAX) {
-    assert(false);
-    // name too long
+  char filename[PATH_MAX];
+  if (!dumper.GetMappingAbsolutePath(mapping, filename))
     return false;
-  }
-
-  my_memcpy(filename, mapping.name, filename_len);
-  filename[filename_len] = '\0';
 
   MemoryMappedFile mapped_file(filename, mapping.offset);
   if (!mapped_file.data() || mapped_file.size() < SELFMAG) {
@@ -260,7 +408,6 @@ bool ElfFileSoName(
 }  // namespace
 
 
-// static
 void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
                                                  char* file_path,
                                                  size_t file_path_size,
@@ -273,8 +420,10 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
   // apk on Android). We try to find the name of the shared object (SONAME) by
   // looking in the file for ELF sections.
   bool mapped_from_archive = false;
-  if (mapping.exec && mapping.offset != 0)
-    mapped_from_archive = ElfFileSoName(mapping, file_name, file_name_size);
+  if (mapping.exec && mapping.offset != 0) {
+    mapped_from_archive =
+        ElfFileSoName(*this, mapping, file_name, file_name_size);
+  }
 
   if (mapped_from_archive) {
     // Some tools (e.g., stackwalk) extract the basename from the pathname. In
@@ -296,19 +445,15 @@ void LinuxDumper::GetMappingEffectiveNameAndPath(const MappingInfo& mapping,
 }
 
 bool LinuxDumper::ReadAuxv() {
-  char auxv_path[NAME_MAX]; // = "/proc/self/auxv";
+  char auxv_path[NAME_MAX];
   if (!BuildProcPath(auxv_path, pid_, "auxv")) {
-  	logger::write("LinuxDumper::ReadAuxv BuildProcPath fail", strlen("LinuxDumper::ReadAuxv BuildProcPath fail"));
     return false;
   }
 
   int fd = sys_open(auxv_path, O_RDONLY, 0);
   if (fd < 0) {
-  	logger::write("LinuxDumper::ReadAuxv sys_open fail", strlen("LinuxDumper::ReadAuxv sys_open fail"));
     return false;
   }
-
-  // __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "ReadAuxv %s:%d:%d\n", auxv_path, pid_, getpid());
 
   elf_aux_entry one_aux_entry;
   bool res = false;
@@ -316,40 +461,19 @@ bool LinuxDumper::ReadAuxv() {
                   &one_aux_entry,
                   sizeof(elf_aux_entry)) == sizeof(elf_aux_entry) &&
          one_aux_entry.a_type != AT_NULL) {
-        // __android_log_print(ANDROID_LOG_ERROR, "google-breakpad", "type:%zx, value:%zx\n",  one_aux_entry.a_type, one_aux_entry.a_un.a_val);
     if (one_aux_entry.a_type <= AT_MAX) {
       auxv_[one_aux_entry.a_type] = one_aux_entry.a_un.a_val;
       res = true;
-	  logger::write("LinuxDumper::ReadAuxv SUCCESS", strlen("LinuxDumper::ReadAuxv SUCCESS"));
     }
   }
   sys_close(fd);
-  logger::write("LinuxDumper::ReadAuxv END", strlen("LinuxDumper::ReadAuxv END"));
   return res;
 }
 
 bool LinuxDumper::EnumerateMappings() {
-  char maps_path[NAME_MAX];// = "/proc/self/maps";
+  char maps_path[NAME_MAX];
   if (!BuildProcPath(maps_path, pid_, "maps"))
     return false;
-
-  /*
-  FILE* fp = fopen(maps_path, "r");
-  if (fp != NULL){
-  	fseek(fp, 0, SEEK_END);
-	int size = ftell(fp);
-	printf("size:%d\n", size);
-	char temp[1024] = {0};
-	fgets(temp, sizeof(temp), fp);
-	printf("line:%s\n", temp);
-		
-	
-	fclose(fp);
-  }
-  else{
-	printf("error:%d:%s\n", errno, strerror(errno));
-  }
-  */
 
   // linux_gate_loc is the beginning of the kernel's mapping of
   // linux-gate.so in the process.  It doesn't actually show up in the
@@ -360,20 +484,16 @@ bool LinuxDumper::EnumerateMappings() {
   // information.
   const void* linux_gate_loc =
       reinterpret_cast<void *>(auxv_[AT_SYSINFO_EHDR]);
-  // printf("vDSO address:%p\n", linux_gate_loc);
   // Although the initial executable is usually the first mapping, it's not
   // guaranteed (see http://crosbug.com/25355); therefore, try to use the
   // actual entry point to find the mapping.
   const void* entry_point_loc = reinterpret_cast<void *>(auxv_[AT_ENTRY]);
-  //printf("entry point loc:%p\n", entry_point_loc);
 
   const int fd = sys_open(maps_path, O_RDONLY, 0);
-  //printf("map path:%s\n", maps_path);
   if (fd < 0)
     return false;
   LineReader* const line_reader = new(allocator_) LineReader(fd);
 
-  //printf("open %s success fd:%d\n", maps_path, fd);
   const char* line;
   unsigned line_len;
   while (line_reader->GetNextLine(&line, &line_len)) {
@@ -395,37 +515,14 @@ bool LinuxDumper::EnumerateMappings() {
             name = kLinuxGateLibraryName;
             offset = 0;
           }
-
-		  if (name != NULL){
-			// printf("mapings name:%s\n", name);
-		  }
           // Merge adjacent mappings with the same name into one module,
           // assuming they're a single library mapped by the dynamic linker
           if (name && !mappings_.empty()) {
-		  	//printf("mapings 1\n");
-			// same name back
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
                 (my_strlen(name) == my_strlen(module->name)) &&
-                (my_strncmp(name, module->name, my_strlen(name)) == 0)) {
-              module->size = end_addr - module->start_addr;
-              line_reader->PopLine(line_len);
-              continue;
-            }
-          }
-          // Also merge mappings that result from address ranges that the
-          // linker reserved but which a loaded library did not use. These
-          // appear as an anonymous private mapping with no access flags set
-          // and which directly follow an executable mapping.
-          if (!name && !mappings_.empty()) {
-		  	//printf("mapping 2\n");
-            MappingInfo* module = mappings_.back();
-            if ((start_addr == module->start_addr + module->size) &&
-                module->exec &&
-                module->name[0] == '/' &&
-                offset == 0 && my_strncmp(i2,
-                                          kReservedFlags,
-                                          sizeof(kReservedFlags) - 1) == 0) {
+                (my_strncmp(name, module->name, my_strlen(name)) == 0) &&
+                (exec == module->exec)) {
               module->size = end_addr - module->start_addr;
               line_reader->PopLine(line_len);
               continue;
@@ -634,10 +731,13 @@ bool LinuxDumper::HandleDeletedFileInMapping(char* path) const {
 
   // Check |path| against the /proc/pid/exe 'symlink'.
   char exe_link[NAME_MAX];
-  char new_path[NAME_MAX];
   if (!BuildProcPath(exe_link, pid_, "exe"))
     return false;
-  if (!SafeReadLink(exe_link, new_path))
+  MappingInfo new_mapping = {0};
+  if (!SafeReadLink(exe_link, new_mapping.name))
+    return false;
+  char new_path[PATH_MAX];
+  if (!GetMappingAbsolutePath(new_mapping, new_path))
     return false;
   if (my_strcmp(path, new_path) != 0)
     return false;
